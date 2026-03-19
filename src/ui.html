@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame Builder Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fff;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .section p {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .divider {
+            height: 1px;
+            background: #e5e5e5;
+            margin: 15px 0;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .input-number {
+            padding: 6px 8px;
+            border: 1px solid #d5d5d5;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .info-box {
+            background: #f0f4ff;
+            border-left: 3px solid #667eea;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+
+        .info-box h3 {
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .info-box ul {
+            list-style: none;
+            font-size: 11px;
+        }
+
+        .info-box li {
+            margin-bottom: 4px;
+            padding-left: 14px;
+        }
+
+        .info-box li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+
+        .message-box {
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .message-box.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .message-box.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .message-box.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 Frame Builder Pro</h1>
+        <p class="subtitle">Crea frames 1200x1200 con autolayouts</p>
+    </div>
+
+    <div class="content">
+        <div class="section">
+            <h2>Crear Frame Individual</h2>
+            <p>Genera un frame 1200x1200 con estructura completa.</p>
+            <button class="btn btn-primary" id="createSingleBtn">
+                📐 Crear Frame
+            </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <h2>Crear Múltiples Frames</h2>
+            <p>Crea varios frames a la vez para diferentes marcas.</p>
+            
+            <div class="input-group">
+                <label for="quantityInput">Cantidad:</label>
+                <input 
+                    type="number" 
+                    id="quantityInput" 
+                    min="1" 
+                    max="10" 
+                    value="3"
+                    class="input-number"
+                >
+            </div>
+
+            <button class="btn btn-primary" id="createMultipleBtn">
+                📊 Crear Múltiples
+            </button>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="info-box">
+            <h3>📋 Estructura del Frame:</h3>
+            <ul>
+                <li>Concepto (Libre)</li>
+                <li>Hero Section</li>
+                <li>Footer</li>
+            </ul>
+        </div>
+
+        <div id="messageBox" class="message-box hidden"></div>
+    </div>
+
+    <script>
+        const createSingleBtn = document.getElementById('createSingleBtn');
+        const createMultipleBtn = document.getElementById('createMultipleBtn');
+        const quantityInput = document.getElementById('quantityInput');
+        const messageBox = document.getElementById('messageBox');
+
+        createSingleBtn.addEventListener('click', () => {
+            parent.postMessage({ pluginMessage: { type: 'create-frame' } }, '*');
+        });
+
+        createMultipleBtn.addEventListener('click', () => {
+            const quantity = parseInt(quantityInput.value);
+            
+            if (quantity < 1 || quantity > 10) {
+                showMessage('❌ Cantidad entre 1 y 10', 'error');
+                return;
+            }
+
+            parent.postMessage({ 
+                pluginMessage: { 
+                    type: 'create-multiple',
+                    quantity: quantity
+                } 
+            }, '*');
+        });
+
+        window.onmessage = (event) => {
+            if (event.data.pluginMessage) {
+                const { type, message } = event.data.pluginMessage;
+                
+                if (type === 'success') {
+                    showMessage(message, 'success');
+                } else if (type === 'error') {
+                    showMessage(message, 'error');
+                }
+            }
+        };
+
+        function showMessage(text, type) {
+            messageBox.textContent = text;
+            messageBox.className = `message-box ${type}`;
+            
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
